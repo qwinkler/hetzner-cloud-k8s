@@ -1,0 +1,12 @@
+---
+- name: restart docker
+  shell: systemctl daemon-reload
+  notify:
+  - systemctl | reload daemon
+  - docker | reload docker
+
+- name: systemctl | reload daemon
+  shell: systemctl daemon-reload
+
+- name: docker | reload docker
+  shell: systemctl restart docker

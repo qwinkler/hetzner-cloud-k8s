@@ -1,0 +1,14 @@
+{
+  "variables": {
+    "docker_version": "19.03.8",
+    "kubernetes_version": "v1.16.12",
+    "calicoctl_version": "v3.14.0",
+    "hcloud_token": "{{env `HCLOUD_TOKEN`}}",
+    "hcloud_image": "ubuntu-18.04",
+    "hcloud_location": "nbg1",
+    "hcloud_server_type": "cx11",
+    "hcloud_ssh_username": "root",
+    "hcloud_snapshot_name": "kube-node-{{user `hcloud_image`}}:docker{{user `docker_version`}}-k8s{{user `kubernetes_version`}}"
+  },
+  "sensitive-variables": [ "hcloud_token" ]
+}

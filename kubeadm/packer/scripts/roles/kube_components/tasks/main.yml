@@ -1,0 +1,94 @@
+---
+  - name: letting iptables see bridged traffic 
+    block:
+      - name: copy configuration file
+        copy:
+          src: sysctl_kube.conf
+          dest: /etc/sysctl.d/k8s.conf
+          mode: '0644'
+      - name: read values from all system directories
+        shell: sysctl --system
+
+  - name: installing kubeadm, kubelet and kubectl
+    block:
+      - name: install pre-requirements
+        apt:
+          pkg:
+            - "apt-transport-https"
+            - "curl"
+          state: present
+          update_cache: yes
+      - name: adding apt key
+        apt_key:
+          url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+          state: present
+      - name: adding apt repository
+        apt_repository:
+          repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+          state: present
+      - name: set apt packages version
+        set_fact:
+          kube_binaries_version: "{{ kubernetes_version | replace('v', '') + '*' }}"
+      - vars: 
+          k8s_ver_list: "{{ (kube_binaries_version|replace('v', '')).split('.') }}"
+          k8s_cni_version: "{{ kubernetes_cni_version + '*' }}"
+        name: installing kube binaries
+        apt:
+          pkg:
+            - "kubelet={{ kube_binaries_version }}"
+            - "kubectl={{ kube_binaries_version }}"
+            - "kubeadm={{ kube_binaries_version }}"
+            - "kubernetes-cni={{ k8s_cni_version }}"
+          state: present
+          update_cache: yes
+        when: (k8s_ver_list[0] + '.' + k8s_ver_list[1])|float <= 1.14
+      - vars: 
+          k8s_ver_list: "{{ (kube_binaries_version|replace('v', '')).split('.') }}"
+        name: installing kube binaries
+        apt:
+          pkg:
+            - "kubelet={{ kube_binaries_version }}"
+            - "kubectl={{ kube_binaries_version }}"
+            - "kubeadm={{ kube_binaries_version }}"
+          state: present
+          update_cache: yes
+        when: (k8s_ver_list[0] + '.' + k8s_ver_list[1])|float > 1.14
+
+  - name: start docker to pre pull kubernetes images
+    service:
+      name: docker
+      state: started
+
+  - name: pull required kubernetes images
+    shell: "kubeadm config images pull --kubernetes-version={{ kubernetes_version }}"
+
+  - name: configure cloud provider in kubelet
+    block:
+      - name: create kubelet serviced directory
+        file:
+          path: /etc/systemd/system/kubelet.service.d/
+          state: directory
+      - name: copy configuration file
+        copy:
+          src: kubelet_cloud_provider.conf
+          dest: /etc/systemd/system/kubelet.service.d/20-hcloud.conf
+          mode: '0644'
+  
+  - name: install and configure calicoctl
+    block:
+      - name: downloading calicoctl
+        get_url:
+          url: https://github.com/projectcalico/calicoctl/releases/download/{{ calicoctl_version }}/calicoctl
+          dest: /usr/bin/calicoctl
+          mode: '0755'
+
+      - name: create calico directory
+        file:
+          path: /etc/calico
+          state: directory
+
+      - name: generate calicoctl configuration file
+        template:
+          src: calico_cfg.yaml.j2
+          dest: /etc/calico/calicoctl.cfg
+          mode: '0644'

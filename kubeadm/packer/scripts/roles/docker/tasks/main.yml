@@ -1,0 +1,25 @@
+---
+  - name: download installation script
+    get_url:
+      url: https://get.docker.com
+      dest: /tmp/install_docker.sh
+      mode: '0440'
+  
+  - name: install
+    environment:
+      VERSION: "{{ docker_version }}"
+    shell: sh /tmp/install_docker.sh
+    notify: restart docker
+ 
+  - name: copy daemon config
+    copy:
+      src: daemon.json
+      dest: /etc/docker/daemon.json
+      mode: '0644'
+
+  - name: create a service daemon directory if it does not exist
+    file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+  
+  - meta: flush_handlers

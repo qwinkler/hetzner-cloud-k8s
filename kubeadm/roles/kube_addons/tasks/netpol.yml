@@ -1,0 +1,14 @@
+---
+  - name: "network policies: create directory"
+    file:
+      path: "{{ ansible_home_dir }}/calico"
+      state: directory
+  
+  - name: "network policies: generate calico policies"
+    template:
+      src: netpol.yaml.j2
+      dest: "{{ ansible_home_dir }}/calico/netpolicies.yaml"
+      mode: '0644'
+
+  - name: "network policies: apply"
+    shell: "calicoctl apply -f {{ ansible_home_dir }}/calico/netpolicies.yaml"

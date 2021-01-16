@@ -1,0 +1,23 @@
+---
+- name: install docker and kube components
+  hosts: all
+  connection: ssh
+  gather_facts: no
+
+  tasks:
+  - name: include variables
+    include_vars:
+      file: vars.yml
+  
+  - name: install useful tools
+    apt:
+      pkg:
+        - "vim"
+      state: present
+      update_cache: yes
+
+  - include_role:
+      name: docker
+
+  - include_role:
+      name: kube_components

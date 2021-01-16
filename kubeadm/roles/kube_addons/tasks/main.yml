@@ -1,0 +1,27 @@
+---
+  - name: "cni: install calico"
+    shell: "kubectl apply -f https://docs.projectcalico.org/{{ kubernetes_calico_version }}/manifests/calico.yaml"
+  
+  - import_tasks: hetzner_ccm.yml
+    when: kubernetes_hetzner_ccm_enabled|bool == true
+
+  - import_tasks: hetzner_csi.yml
+    when: kubernetes_hetzner_csi_enabled|bool == true
+
+  - import_tasks: helm3.yml
+    when: kubernetes_helm3_enabled|bool == true
+
+  - import_tasks: metric_server.yml
+    when: kubernetes_metrics_server_enabled|bool == true
+
+  - import_tasks: ingress.yml
+    when: kubernetes_ingress_controller_enabled|bool == true
+
+  - import_tasks: cert_manager.yml
+    when: kubernetes_cert_manager_enabled|bool == true
+
+  - import_tasks: cert_manager_hetzner_webhook.yml
+    when: kubernetes_cert_manager_webhook_enabled|bool == true
+
+  - import_tasks: netpol.yml
+    when: kubernetes_netpol_enabled|bool == true

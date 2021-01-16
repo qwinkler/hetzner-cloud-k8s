@@ -1,0 +1,21 @@
+---
+  - name: "ingress: create namespace"
+    shell: kubectl create ns ingress --dry-run -o yaml | kubectl apply -f -
+
+  - name: "ingress: create directory"
+    file:
+      path: "{{ ansible_home_dir }}/ingress"
+      state: directory
+  
+  - name: "ingress: generate values file"
+    template:
+      src: nginx_ingress_values.yaml.j2
+      dest: "{{ ansible_home_dir }}/ingress/values.yaml"
+      mode: '0644'
+
+  - name: "ingress: install"
+    shell: >
+      helm upgrade -i ingress stable/nginx-ingress \
+        --namespace ingress \
+        --version {{ kubernetes_ingress_controller_version }} \
+        -f {{ ansible_home_dir }}/ingress/values.yaml

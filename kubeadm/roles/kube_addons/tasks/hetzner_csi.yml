@@ -1,0 +1,22 @@
+---
+  - name: "hetzner csi: create hetzner cloud secret"
+    shell: >
+      kubectl create secret generic hcloud \
+        -n kube-system\
+        --from-literal=token={{ hetzner_cloud_token }} \
+        --from-literal=network={{ hetzner_cloud_network }} \
+        --dry-run -o yaml | kubectl apply -f -
+
+  - name: "hetzner csi: create csi directory"
+    file:
+      path: "{{ ansible_home_dir }}/hetzner/csi"
+      state: directory
+  
+  - name: "hetzner csi: generate yaml file"
+    template:
+      src: hetzner_csi.yaml.j2
+      dest: "{{ ansible_home_dir }}/hetzner/csi/full.yaml"
+      mode: '0644'
+
+  - name: "hetzner csi: apply deployment file"
+    shell: "kubectl apply -f {{ ansible_home_dir }}/hetzner/csi/full.yaml"

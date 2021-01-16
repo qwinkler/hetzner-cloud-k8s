@@ -1,0 +1,18 @@
+---
+  - name: "metrics server: create directory"
+    file:
+      path: "{{ ansible_home_dir }}/metrics_server"
+      state: directory
+  
+  - name: "metrics server: generate values file"
+    template:
+      src: metrics_server_values.yaml.j2
+      dest: "{{ ansible_home_dir }}/metrics_server/values.yaml"
+      mode: '0644'
+
+  - name: "metrics server: install"
+    shell: >
+      helm upgrade -i metrics-server stable/metrics-server \
+        --namespace kube-system \
+        --version {{ kubernetes_metrics_server_version }} \
+        -f {{ ansible_home_dir }}/metrics_server/values.yaml

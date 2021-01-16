@@ -1,0 +1,15 @@
+---
+  - name: "helm: download installation script"
+    get_url:
+      url: https://raw.githubusercontent.com/helm/helm/{{ kubernetes_helm3_version }}/scripts/get-helm-3
+      dest: /tmp/get-helm-3.sh
+      mode: '0700'
+  
+  - name: "helm: install"
+    shell: "/tmp/get-helm-3.sh --version {{ kubernetes_helm3_version }}"
+  
+  - name: "helm: add stable repository"
+    shell: "helm repo add stable {{ kubernetes_helm3_stable_repo }}"
+
+  - name: "helm: upgrade repositories"
+    shell: helm repo update

@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: {{ kubernetes_cert_manager_issuer_name }}
+spec:
+  acme:
+    email: {{ kubernetes_cert_manager_issuer_email }}
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: {{ kubernetes_cert_manager_issuer_name }}-secret-ref
+    solvers:
+    - dns01:
+        webhook:
+          groupName: {{ kubernetes_cert_manager_webhook_hetzner_groupname }}
+          solverName: hetzner
+          config:
+            secretName: hetzner-secret
+            zoneName: {{ kubernetes_cert_manager_webhook_hetzner_zonename }}
+            apiUrl: https://dns.hetzner.com/api/v1

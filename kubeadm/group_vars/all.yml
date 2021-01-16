@@ -1,0 +1,52 @@
+---
+ansible_home_dir: "{{ ansible_env.HOME | default('/root') }}"
+
+hetzner_private_network_ip: "{{ ansible_enp7s0.ipv4.address }}"
+hetzner_cloud_token: "changeme"
+hetzner_cloud_dns_token: "changeme"
+hetzner_cloud_network: "changeme-net"
+
+kubernetes_cluster_name: "quickstart"
+kubernetes_version: v1.16.12
+kubernetes_pod_cidr: "192.168.0.0/16"
+kubernetes_service_cidr: "10.96.0.0/12"
+
+kubernetes_hetzner_ccm_enabled: true
+kubernetes_hetzner_ccm_version: "v1.6.1"
+kubernetes_hetzner_ccm_image: "hetznercloud/hcloud-cloud-controller-manager"
+kubernetes_hetzner_csi_enabled: true
+kubernetes_hetzner_csi_version: "1.4.0"
+
+kubernetes_helm3_enabled: true
+kubernetes_helm3_version: "v3.2.4"
+kubernetes_helm3_stable_repo: "https://kubernetes-charts.storage.googleapis.com"
+
+kubernetes_metrics_server_enabled: true
+kubernetes_metrics_server_version: "2.11.1"
+
+kubernetes_ingress_controller_enabled: true
+kubernetes_ingress_controller_version: "1.39.0"
+kubernetes_ingress_controller_annotations:
+  load-balancer.hetzner.cloud/type: lb11
+  load-balancer.hetzner.cloud/location: fsn1
+  load-balancer.hetzner.cloud/name: k8s-ingress-lb
+  load-balancer.hetzner.cloud/use-private-ip: true
+  load-balancer.hetzner.cloud/uses-proxyprotocol: true
+  load-balancer.hetzner.cloud/disable-public-network: true
+
+kubernetes_cert_manager_enabled: true
+kubernetes_cert_manager_version: "v0.15.2"
+kubernetes_cert_manager_helm_repo: "https://qwinkler.github.io/cert-manager-webhook-hetzner"
+kubernetes_cert_manager_issuer_name: "quickstart-issuer"
+kubernetes_cert_manager_issuer_email: "changeme@domain.tld"
+
+kubernetes_cert_manager_webhook_enabled: true
+kubernetes_cert_manager_webhook_hetzner_groupname: "acme.domain.tld"
+kubernetes_cert_manager_webhook_hetzner_zonename: "domain.tld"
+kubernetes_cert_manager_webhook_hetzner_version: "0.1.0"
+
+kubernetes_netpol_enabled: true
+kubernetes_netpol_allow_cidrs:
+  - "192.168.0.0/16"
+  - "10.96.0.0/12"
+  - "10.10.0.0/24"

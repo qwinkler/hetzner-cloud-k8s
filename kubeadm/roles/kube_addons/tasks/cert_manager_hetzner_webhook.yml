@@ -1,0 +1,48 @@
+---
+  - name: "cert-manager-webhook-hetzner: create ns"
+    shell: kubectl create ns cert-manager --dry-run -o yaml | kubectl apply -f -
+
+  - name: "cert-manager-webhook-hetzner: add helm repository"
+    shell: helm repo add hetzner-webhook {{ kubernetes_cert_manager_helm_repo }}
+    
+  - name: "cert-manager-webhook-hetzner: update repositories"
+    shell: helm repo update
+
+  - name: "cert-manager-webhook-hetzner: create hetzner cloud dns secret"
+    shell: >
+      kubectl create secret generic hetzner-secret \
+        -n cert-manager \
+        --from-literal=api-key={{ hetzner_cloud_dns_token }}  \
+        --dry-run -o yaml | kubectl apply -f -
+
+  - name: waiting for cert-manager's webhook
+    pause:
+      seconds: 90
+
+  # - name: waiting for cert-manager's webhook
+  #   shell: kubectl get pod -n cert-manager
+  #   register: healthcheck_certmanager
+  #   until: "'0/1' not in healthcheck_certmanager.stdout"
+  #   retries: 6
+  #   delay: 15
+
+  - name: "cert-manager-webhook-hetzner: install"
+    shell: >
+      helm upgrade -i cert-manager-webhook-hetzner hetzner-webhook/cert-manager-webhook-hetzner \
+      --namespace cert-manager \
+      --version {{ kubernetes_cert_manager_webhook_hetzner_version }} \
+      --set groupName={{ kubernetes_cert_manager_webhook_hetzner_groupname }}
+
+  - name: "cert-manager-webhook-hetzner: create directory"
+    file:
+      path: "{{ ansible_home_dir }}/cert-manager-webhook-hetzner"
+      state: directory
+  
+  - name: "cert-manager-webhook-hetzner: generate issuer yaml"
+    template:
+      src: clusterissuer.yaml.j2
+      dest: "{{ ansible_home_dir }}/cert-manager-webhook-hetzner/clusterissuer.yaml"
+      mode: '0644'
+
+  - name: "cert-manager-webhook-hetzner: create cluster issuer"
+    shell: "kubectl apply -f {{ ansible_home_dir }}/cert-manager-webhook-hetzner/clusterissuer.yaml"

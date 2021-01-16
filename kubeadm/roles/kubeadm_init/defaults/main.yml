@@ -1,0 +1,9 @@
+---
+ansible_home_dir: "{{ ansible_env.HOME | default('/root') }}"
+
+hetzner_private_network_ip: "{{ ansible_default_ipv4.address }}"
+kubernetes_cluster_name: "local_cluster"
+
+kubernetes_version: v1.16.9
+kubernetes_pod_cidr: "192.168.0.0/16"
+kubernetes_service_cidr: "10.96.0.0/12"

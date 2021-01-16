@@ -1,0 +1,12 @@
+---
+- name: "install kubernetes via kubeadm with addons"
+  hosts: masters
+  become: false
+  gather_facts: yes
+  
+  tasks: 
+  - include_role:
+      name: kubeadm_init
+  
+  - include_role:
+      name: kube_addons

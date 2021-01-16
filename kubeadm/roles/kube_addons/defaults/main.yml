@@ -1,0 +1,34 @@
+ansible_home_dir: "{{ ansible_env.HOME | default('/root') }}"
+
+kubernetes_pod_cidr: "192.168.0.0/16"
+
+kubernetes_calico_version: "v3.14"
+kubernetes_metrics_server_version: "2.11.1"
+kubernetes_hetzner_ccm_version: "v1.6.1"
+kubernetes_hetzner_ccm_image: "hetznercloud/hcloud-cloud-controller-manager"
+kubernetes_hetzner_csi_version: "1.4.0"
+kubernetes_helm3_version: "v3.2.4"
+kubernetes_helm3_stable_repo: "https://kubernetes-charts.storage.googleapis.com"
+kubernetes_ingress_controller_version: "1.39.0"
+kubernetes_ingress_controller_annotations:
+  load-balancer.hetzner.cloud/location: hel1
+  load-balancer.hetzner.cloud/name: k8s-ingress-lb
+  load-balancer.hetzner.cloud/use-private-ip: true
+  load-balancer.hetzner.cloud/uses-proxyprotocol: true
+  load-balancer.hetzner.cloud/type: lb11
+
+kubernetes_cert_manager_version: "v0.15.2"
+kubernetes_cert_manager_issuer_name: "changeme"
+kubernetes_cert_manager_webhook_hetzner_groupname: "acme.change.me"
+kubernetes_cert_manager_webhook_hetzner_zonename: "domain.tld"
+kubernetes_cert_manager_webhook_hetzner_version: "0.1.0"
+hetzner_cloud_dns_token: "changeme"
+
+kubernetes_cert_manager_issuer_email: "changeme@gmail.com"
+
+kubernetes_netpol_allow_cidrs:
+  - "change"
+  - "me"
+
+hetzner_cloud_token: "changeme"
+hetzner_cloud_network: "changeme"

@@ -1,0 +1,53 @@
+---
+  - name: check whether cluster is already initialized
+    shell: kubectl version
+    register: kubectl_stdout
+    failed_when: "'command not found' in kubectl_stdout"
+
+  - name: setup new cluster
+    block:
+      - name: create kubeadm directory
+        file:
+          path: "{{ ansible_home_dir }}/kubeadm"
+          mode: "0700"
+          state: directory
+      - name: generate kubeadm configuration file
+        template:
+          src: kubeadm_cluster_config.yaml.j2
+          dest: "{{ ansible_home_dir }}/kubeadm/cluster_config.yaml"
+          mode: '0644'
+      - name: initialize cluster
+        shell: "kubeadm init --config {{ ansible_home_dir }}/kubeadm/cluster_config.yaml"
+      - name: create kube config dir for current/ansible become user
+        file:
+          path: "{{ ansible_home_dir }}/.kube"
+          mode: "0700"
+          state: directory
+      - name: copy admin kubeconfig to current/ansible become user home
+        copy:
+          src: "/etc/kubernetes/admin.conf"
+          dest: "{{ ansible_home_dir }}/.kube/config"
+          remote_src: yes
+          mode: "0600"
+          backup: yes
+    when: kubectl_stdout.stderr is defined
+
+  - name: get nodes with master taint
+    shell: >
+      kubectl get nodes -o custom-columns=NAME:.metadata.name,TAINTS:.spec.taints --no-headers \
+      | grep "node-role.kubernetes.io/master"
+    register: master_taint
+    failed_when: "'was refused' in master_taint.stdout"
+
+  - name: untaint master node
+    shell: "kubectl taint nodes --all node-role.kubernetes.io/master-" 
+    when: master_taint.stdout != ""
+
+  - name: get nodes with master label
+    shell: kubectl get nodes -l node-role.kubernetes.io/master -o NAME
+    register: master_label
+    failed_when: "'was refused' in master_label.stdout"
+
+  - name: unlabel master node
+    shell: "kubectl label node --all node-role.kubernetes.io/master-"
+    when: master_label.stdout != ""

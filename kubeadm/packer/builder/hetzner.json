@@ -1,0 +1,18 @@
+{
+  "builders": [
+    {
+      "type": "hcloud",
+      "token": "{{user `hcloud_token`}}",
+      "image": "{{user `hcloud_image`}}",
+      "location": "{{user `hcloud_location`}}",
+      "server_type": "{{user `hcloud_server_type`}}",
+      "ssh_username": "{{user `hcloud_ssh_username`}}",
+      "snapshot_name": "{{user `hcloud_snapshot_name`}}",
+      "snapshot_labels": {
+        "managed-by": "packer",
+        "automated": "true",
+        "base-image": "{{user `hcloud_image`}}"
+      }
+    }
+  ]
+}
